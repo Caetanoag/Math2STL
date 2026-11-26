@@ -43,3 +43,6 @@ disallow_untyped_defs = true
 disallow_incomplete_defs = true
 no_implicit_reexport = true
 ignore_missing_imports = false
+[[tool.mypy.overrides]]
+module = ["sympy", "sympy.*"]
+ignore_missing_imports = true
