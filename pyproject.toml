@@ -1,0 +1,45 @@
+[tool.ruff]
+line-length = 88
+target-version = "py312" # Ajuste para a versão do seu projeto
+
+[tool.ruff.lint]
+select = [
+    "E",   # pycodestyle (erros)
+    "W",   # pycodestyle (avisos)
+    "F",   # pyflakes (variáveis não usadas, imports quebrados)
+    "I",   # isort (ordenação estrita de imports)
+    "B",   # flake8-bugbear (bugs comuns e anti-patterns)
+    "C90", # mccabe (complexidade de código)
+    "N",   # pep8-naming (convenções de nomenclatura)
+    "UP",  # pyupgrade (sintaxe moderna do Python)
+    "ANN", # flake8-annotations (exige type hints em todas as funções)
+    "S",   # flake8-bandit (vulnerabilidades de segurança)
+    "PT",  # flake8-pytest-style (boas práticas em testes)
+    "RET", # flake8-return (retornos limpos e consistentes)
+    "SIM", # flake8-simplify (simplificação de lógica)
+    "ARG", # flake8-unused-arguments (argumentos não utilizados)
+    "ERA", # eradicate (bloqueia código comentado no repositório)
+]
+ignore = [
+    "ANN101", # Não exige tipagem para 'self'
+    "ANN102", # Não exige tipagem para 'cls'
+]
+
+[tool.ruff.lint.mccabe]
+max-complexity = 8 # Bloqueia funções muito longas ou com muitos if/else
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**/*.py" = [
+    "S101", # Permite o uso de 'assert' nos testes
+    "ANN",  # Não exige tipagem estrita em funções de teste
+]
+
+[tool.mypy]
+python_version = "3.12"
+strict = true
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
+no_implicit_reexport = true
+ignore_missing_imports = false
