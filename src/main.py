@@ -14,7 +14,7 @@ def preview_assembly(
     x_range: tuple[float, float],
     y_range: tuple[float, float],
     margin_mm: float = 12.0,
-    footer_height_mm: float = 22.0,
+    footer_height_mm: float = 34.0,
     mdf_thickness: float = 3.0,
 ) -> None:
     board_mesh, engravings = load_dxf_for_preview(dxf_path, mdf_thickness=mdf_thickness)
@@ -58,6 +58,36 @@ def sanitize_filename(text: str) -> str:
     return clean or "custom"
 
 
+def _prompt_range(label: str, default: tuple[float, float]) -> tuple[float, float]:
+    """Lê um intervalo 'min, max' no terminal ou retorna o padrão."""
+    raw = input(f"{label} [padrão {default[0]}, {default[1]}]: ").strip()
+    if not raw:
+        return default
+
+    parts = [p.strip() for p in raw.replace(";", ",").split(",") if p.strip()]
+    if len(parts) != 2:
+        raise ValueError(
+            f"Formato inválido para {label}. Use 'min, max' (ex: -30, 30)."
+        )
+
+    low, high = float(parts[0]), float(parts[1])
+    if low >= high:
+        raise ValueError(
+            f"O valor mínimo ({low}) deve ser menor que o máximo ({high})."
+        )
+    return (low, high)
+
+
+def _prompt_float(label: str, default: float) -> float:
+    raw = input(f"{label} [padrão {default}]: ").strip()
+    return float(raw) if raw else default
+
+
+def _prompt_int(label: str, default: int) -> int:
+    raw = input(f"{label} [padrão {default}]: ").strip()
+    return int(raw) if raw else default
+
+
 def generate_project_files(
     equation_str: str,
     x_range: tuple[float, float] = (-25.0, 25.0),
@@ -81,7 +111,7 @@ def generate_project_files(
     stl_path = output_dir / f"{func_name}_{safe_eq_name}.stl"
     dxf_path = output_dir / f"base_mdf_{safe_eq_name}.dxf"
 
-    print(f"[1/3] Gerando malha 3D em: {stl_path}")
+    print(f"\n[1/3] Gerando malha 3D em: {stl_path}")
     solid_mesh = export_stl_pyvista(
         expr=expr,
         vars_list=var_names,
@@ -95,7 +125,13 @@ def generate_project_files(
     width_mm = float(x_range[1] - x_range[0])
     depth_mm = float(y_range[1] - y_range[0])
     margin_mm = 12.0
-    footer_height_mm = 22.0
+    footer_height_mm = 34.0
+
+    var_x, var_y = str(var_names[0]), str(var_names[1])
+    ranges_label = (
+        f"{var_x}: [{x_range[0]:g}, {x_range[1]:g}]   "
+        f"{var_y}: [{y_range[0]:g}, {y_range[1]:g}]"
+    )
 
     valid_logo = (
         logo_dxf_path if (logo_dxf_path and Path(logo_dxf_path).exists()) else None
@@ -109,16 +145,17 @@ def generate_project_files(
         margin_mm=margin_mm,
         footer_height_mm=footer_height_mm,
         corner_radius_mm=4.0,
+        ranges_text=ranges_label,
         logo_dxf_path=valid_logo,
-        logo_scale=0.5,
+        logo_scale=None,
     )
 
     print(f"[3/3] Concluído! Arquivos salvos em '{output_dir.resolve()}'")
     print(
-        f"      Malha fechada (manifold): {solid_mesh.is_manifold} | Arestas abertas: {solid_mesh.n_open_edges}"
+        f"      Dimensões do modelo: {width_mm:.1f} x {depth_mm:.1f} mm | "
+        f"Manifold: {solid_mesh.is_manifold} | Arestas abertas: {solid_mesh.n_open_edges}"
     )
 
-    # Agora chama a pré-visualização da montagem completa (Base MDF + STL)
     if preview:
         preview_assembly(
             solid_mesh=solid_mesh,
@@ -134,18 +171,23 @@ def generate_project_files(
 
 
 if __name__ == "__main__":
-    equacao = input(
-        "Digite a equação (ex: f(x, y) = 4 * sin(x/4) * cos(y/4)): "
-    ).strip()
-    if not equacao:
-        equacao = "f(x, y) = 4 * sin(x/4) * cos(y/4)"
+    print("=== math2stl ===")
+    equacao = (
+        input("Equação [padrão f(x, y) = 4 * sin(x/4) * cos(y/4)]: ").strip()
+        or "f(x, y) = 4 * sin(x/4) * cos(y/4)"
+    )
+
+    x_lim = _prompt_range("Intervalo X em mm (min, max)", (-30.0, 30.0))
+    y_lim = _prompt_range("Intervalo Y em mm (min, max)", (-30.0, 30.0))
+    espessura_base = _prompt_float("Espessura mínima da base STL (mm)", 2.0)
+    resolucao = _prompt_int("Resolução da grade (pontos por eixo)", 250)
 
     generate_project_files(
         equation_str=equacao,
-        x_range=(-30.0, 30.0),
-        y_range=(-30.0, 30.0),
-        num_points=250,
-        base_thickness=2.0,
+        x_range=x_lim,
+        y_range=y_lim,
+        num_points=resolucao,
+        base_thickness=espessura_base,
         logo_dxf_path="assets/logo.dxf",
         preview=True,
     )
