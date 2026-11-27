@@ -61,7 +61,7 @@ def plot_expression_gpu(
     vars_list: list[str] | list[sp.Symbol],
     x_range: tuple[float, float] = (-10, 10),
     y_range: tuple[float, float] = (-10, 10),
-    num_points: int = 500,  # Suporta resoluções muito maiores sem travar
+    num_points: int = 1000,  # Suporta resoluções muito maiores sem travar
 ) -> pv.StructuredGrid:
     if len(vars_list) != 2:
         raise ValueError(f"Esperadas 2 variáveis, recebeu {len(vars_list)}.")
