@@ -177,8 +177,8 @@ if __name__ == "__main__":
         or "f(x, y) = 4 * sin(x/4) * cos(y/4)"
     )
 
-    x_lim = _prompt_range("Intervalo X em mm (min, max)", (-30.0, 30.0))
-    y_lim = _prompt_range("Intervalo Y em mm (min, max)", (-30.0, 30.0))
+    x_lim = _prompt_range("Intervalo X em mm (min, max)", (-20.0, 20.0))
+    y_lim = _prompt_range("Intervalo Y em mm (min, max)", (-20.0, 20.0))
     espessura_base = _prompt_float("Espessura mínima da base STL (mm)", 2.0)
     resolucao = _prompt_int("Resolução da grade (pontos por eixo)", 250)
 
