@@ -35,10 +35,10 @@ def export_stl_pyvista(
     z_min = float(np.min(z)) - base_thickness
 
     top_grid = pv.StructuredGrid(x, y, z)
-    top = top_grid.extract_surface().triangulate()
+    top = top_grid.extract_surface(algorithm="dataset_surface").triangulate()
 
     bot_grid = pv.StructuredGrid(x, y, np.full_like(z, z_min))
-    bot = bot_grid.extract_surface().triangulate()
+    bot = bot_grid.extract_surface(algorithm="dataset_surface").triangulate()
 
     boundary = top.extract_feature_edges(
         boundary_edges=True,
